@@ -1,92 +1,423 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내부 페이지세요</title>
-   
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <title>나만의 채팅</title>
     <style>
         body {
-            font-family: 'Noto Serif KR', 'Arial', sans-serif;
-            font-size: 18px;
-            line-height: 1.95;
+            font-family: 'Arial', sans-serif;
             margin: 0;
+            padding: 0;
+            background-color: #ececec;
+        }
+
+        .main-container {
+            max-width: 600px;
+            margin: 0 auto;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
             height: 100vh;
-            background-color: #f9f9f9;
-            color: #333;
         }
-        div {
-            text-align: left;
-            max-width: 800px;
+
+        .chat-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #ddd;
         }
-        span {
-            display: inline;
-            user-select: text;
+
+        .chat-room {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
         }
-        .highlight {
-            background-color: #980000; 
-            transition: background-color 0.3s ease; 
-        } 
-      
-        .no-highlight {
-            pointer-events: none; 
-            cursor: default; 
+
+        .chat-room:hover {
+            background-color: #f9f9f9;
         }
-      /* 이게 뭐냐면요 사람마다 메인페이지 통글에 포함 된 문장이 다르자나요?
-          예를들어 "효정이가 [사과를]먹었다 에서 [사과를]만 메인페이지 글에 들어갔다면, 내부 설명 페이지에 들어갔을때도 그 단어에만 하이라이트가 됩니다. 
-          그리고 그 부분을 클릭해야?!?!?!?! 진짜 그사람의 사이트로 연결되규요 !! 밑에 링크 거는 곳 있어용 에시 페이지 주소니까 각 개인의 주소 넣으시면 됩니당. 모르시는 거 항시 물어보시고용 ~~*/
-         /* */
-         /*그르니까 메인 페이지는 제가 단톡에 보낸 동영상에서 보실 수 있어여. 디자인팀 피그마 링크에서 보면 좀 더 이해될 거요. 메인페이지에 총 22분의 글이 합쳐서 쓰여있고,
- 클릭하면 각 글 조각마다 지정된 색들이 알아서 하이라이트 됩니다. 동영상 보면 좀 더 이해가 될 거야 ~) 그리고 그 하이라이트 된 부분을 한 번 더 누르면 개인의 설명페이지로 이동하고요,
- 그 설명페이지에 하이라이트 된 단락을 클릭하면 최종 개인 페이지가 나온다고 보시면 됩니다. 용갱 수민씨는 지금 총 22분의 설명하는 페이지를 열분씩 나눠서 만들어주시면 될 것 같아요ㅎㅎ. 이해 안되시먄 바로 연락 . 이해 안되시먄 바로 연락 @@   */
+
+        .chat-room .title {
+            font-weight: bold;
+        }
+
+        .chat-container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .chat-window {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            position: relative;
+        }
+
+        .drag-distance {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .message {
+            margin: 10px 0;
+            display: flex;
+        }
+
+        .message .text {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.user .text {
+            background-color: #cce5ff;
+            border: 1px solid #b8daff;
+        }
+
+        .message.friend .text {
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+        }
+
+        .input-container {
+            display: flex;
+            border-top: 1px solid #ddd;
+            background-color: white;
+        }
+
+        .input-container input {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-right: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .input-container button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #4caf50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .input-container button:hover {
+            background-color: #45a049;
+        }
+
+        .back-button {
+            padding: 10px;
+            background-color: #4caf50;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            background-color: #45a049;
+        }
+
+        .special-message {
+            font-size: 16px;
+            color: #f1c40f;
+            background-color: #eaf2f8;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: none;
+            text-align: center;
+            width: 100%;
+        }
+
+        .chat-header {
+            position: relative;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
-    <div>
-       
-        <span class="no-highlight">이 웹사이트는 사람들과 카톡을 통해 나의 친근함의 거리를 나타내는 방식을 이용해 보았습니다</span>
-        <span class="no-highlight">친한사람과 대화를 나눌때는 엔터는 3번이상 쓰면서 </span>
-        <span>ㅋㅋㅋㅋㅋ.</span>
-        <span class="no-highlight">라는 단어를 많이 쓰지만, 공적인 사람들과는 최대한 글을 길고 한문장으로 쓴다는것을 느꼇습니다. </span>
-        <span class="no-highlight"> 그래서 저만의 사람들과의 친함을 대화를 할때 "당신은 이사람과 정말 친하시군요?!!"또는"쓰읍..이사람과 좀 불편한가요?" 라는 반응이 나타나도록 재밌는 형식이 나타날 수 있게 만들어 보았습니다.</span>
-    
-        
+    <div class="main-container">
+        <div class="chat-list" id="chatList">
+            <div class="chat-room" data-room="1">
+                <span class="title">가까운 사람</span>
+            </div>
+            <div class="chat-room" data-room="2">
+                <span class="title">먼 사람</span>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="back-button" id="backButton">뒤로가기</div>
+            <div class="chat-window" id="chatWindow">
+                <div class="drag-distance" id="dragDistance">거리: 0</div>
+            </div>
+            <div class="input-container">
+                <input type="text" id="chatInput" placeholder="메시지를 입력하세요...">
+                <button id="sendButton">전송</button>
+            </div>
+        </div>
     </div>
+
     <script>
-       
-        const spans = document.querySelectorAll('span');
+        let uncomfortableMessageCount = 0;
+        const chatList = document.getElementById('chatList');
+        const chatContainer = document.getElementById('chatContainer');
+        const chatWindow = document.getElementById('chatWindow');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const backButton = document.getElementById('backButton');
+        const dragDistanceDisplay = document.getElementById('dragDistance');
+        const friendshipLevelDisplay = document.querySelector('.friendship-level');
 
-        
-        let lastClicked = null;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let totalDistance = 0;
+        let draggedMessage = null;
+        let enterPressCount1 = 0;
+        let enterPressCount2 = 0;
 
-       
-        spans.forEach(span => {
-            span.addEventListener('click', () => {
-                // 'no-highlight' 클래스를 가진 단락은 하이라이트가 나타나지 않아용 ~~
-                if (span.classList.contains('no-highlight')) return;
+        chatWindow.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('user')) {
+                draggedMessage = e.target;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                dragDistanceDisplay.style.display = 'block';
+                dragDistanceDisplay.textContent = `거리: 0`;
+            }
+        });
 
-                // 이미 하이라이트된 단락을 눌렀을때 ~~@@
-                if (span === lastClicked) {
-                    window.location.href = 'https://ysss2.github.io/jusu.github.io/'; // 링크 넣으시면 됩니두. 이게 그 레알 사이트 주소! 
-                    return;
+        chatWindow.addEventListener('mousemove', (e) => {
+            if (isDragging && draggedMessage) {
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                totalDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                dragDistanceDisplay.textContent = `거리: ${Math.round(totalDistance)}px`;
+            }
+        });
+
+        chatWindow.addEventListener('mouseup', () => {
+            if (isDragging && draggedMessage) {
+                isDragging = false;
+                dragDistanceDisplay.style.display = 'none';
+
+                updateFriendshipLevel(totalDistance);
+
+                draggedMessage = null;
+                totalDistance = 0;
+            }
+        });
+
+        chatWindow.addEventListener('mouseleave', () => {
+            if (isDragging) {
+                isDragging = false;
+                dragDistanceDisplay.style.display = 'none';
+                totalDistance = 0;
+            }
+        });
+
+        function addTypingMessage(text, isUser = false) {
+            const message = document.createElement('div');
+            message.classList.add('message');
+            message.classList.add(isUser ? 'user' : 'friend');
+            const messageText = document.createElement('div');
+            messageText.classList.add('text');
+            message.appendChild(messageText);
+            chatWindow.appendChild(message);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            let index = 0;
+            const typingInterval = setInterval(() => {
+                messageText.innerHTML += text[index];
+                index++;
+                if (index === text.length) {
+                    clearInterval(typingInterval);
+                }
+            }, 100);
+        }
+
+        const chatData = {
+            1: { kCount: 0 },
+            2: { kCount: 0 },
+            3: { kCount: 0 }
+        };
+
+        function countKs(message) {
+            return (message.match(/ㅋ/g) || []).length;
+        }
+
+        function updateFriendshipLevel(distance) {
+            const roomId = chatContainer.dataset.roomId;
+            if (roomId == 1) {
+                const newKCount = Math.floor(distance / 10);
+                chatData[1].kCount = newKCount;
+                friendshipLevelDisplay.textContent = `친밀도: ${newKCount}`;
+            }
+        }
+
+        function updateFriendshipLevel(roomId) {
+            const roomElement = document.querySelector(`.chat-room[data-room="${roomId}"]`);
+            if (roomElement) {
+                const kCount = chatData[roomId].kCount;
+                roomElement.querySelector('.friendship-level').textContent = `친밀도: ${kCount}`;
+            }
+        }
+
+        chatList.addEventListener('click', (e) => {
+            const room = e.target.closest('.chat-room');
+            if (room) {
+                const roomId = room.getAttribute('data-room');
+                chatContainer.dataset.roomId = roomId;
+                chatList.style.display = 'none';
+                chatContainer.style.display = 'flex';
+                chatWindow.innerHTML = `<p>${room.querySelector('.title').textContent}님과의 채팅</p>`;
+
+                if (roomId == 1) {
+                    addTypingMessage("ㅎㅇㅎㅇ", false);
+                    setTimeout(() => {
+                        addTypingMessage("오늘 날씨 춥지안냐?", false);
+                    }, 2000);
                 }
 
-                
-                spans.forEach(s => s.classList.remove('highlight'));
+                if (roomId == 2) {
+                    setTimeout(() => {
+                        addTypingMessage("안녕하세요ㅎㅎ정수씨 잘 지내셨나요?^^", false);
+                    }, 1000);
+                }
+            }
+        });
 
-                // 클릭한 span에만 하이라이트를 추가하게 해둔거구용 
-                span.classList.add('highlight');
+        backButton.addEventListener('click', () => {
+            chatContainer.style.display = 'none';
+            chatList.style.display = 'block';
+        });
 
-                // 이것은 마지막으로 하이라이트 된 문장 냅두기 티비 
-                lastClicked = span;
-            });
+        function addMessage(text, isUser = true) {
+            const message = document.createElement('div');
+            message.classList.add('message');
+            message.classList.add(isUser ? 'user' : 'friend');
+            message.innerHTML = `<div class="text">${text}</div>`;
+            chatWindow.appendChild(message);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            if (isUser) {
+                if (chatContainer.dataset.roomId == 1) {
+                    enterPressCount1++;
+                } else if (chatContainer.dataset.roomId == 2) {
+                    enterPressCount2++;
+                }
+
+                if (chatContainer.dataset.roomId == 1) {
+                    if (enterPressCount1 === 3) {
+                        setTimeout(() => {
+                            addTypingMessage("그니깤ㅋㅋ그냥 이불로 들어갈래", false);
+                        }, 1000);
+                    } else if (enterPressCount1 === 6) {
+                        setTimeout(() => {
+                            addTypingMessage("ㅋㅋㅋ근데 넌 모가 재밌냐ㅋㅋㅋ", false);
+                        }, 1000);
+                    } else if (enterPressCount1 === 9) {
+                        setTimeout(() => {
+                            addTypingMessage("아 타자치는거 웃기넼ㅋㅋ", false);
+                        }, 1000);
+                    } else if (enterPressCount1 === 12) {
+                        setTimeout(() => {
+                            addTypingMessage("왜 웃는뎈ㅋㅋㅋ", false);
+                        }, 1000);
+                    }
+                }
+
+                if (chatContainer.dataset.roomId == 2) {
+                    setTimeout(() => {
+                        addTypingMessage("맞아요ㅠㅠ감기 조심하세요! 아 맞다 정수씨 밥한번 먹어요", false);
+                    }, 2000);
+                }
+
+                if (chatContainer.dataset.roomId == 1) {
+                    if (enterPressCount1 === 3) {
+                        showFriendshipMessage("이사람과 친하시군요?!");
+                    } else if (enterPressCount1 === 6) {
+                        showFriendshipMessage("마음이 잘 맞는거 같아요~!");
+                    } else if (enterPressCount1 === 9) {
+                        showFriendshipMessage("완전 친한거 같아요!!베프ㅎㅎ");
+                    } else if (enterPressCount1 === 12) {
+                        showFriendshipMessage("말.해.모.헤 소울 메이트!!");
+                    }
+                }
+
+                if (chatContainer.dataset.roomId == 1 || chatContainer.dataset.roomId == 2) {
+                    if (text.length > 10) {
+                        setTimeout(() => {
+                            showFriendshipMessage("음... 불편하다.");
+                        }, 1000);
+
+                        if (text.length > 20) {
+                            setTimeout(() => {
+                                showFriendshipMessage("허허 모라고 답하지..^^");
+                            }, 2000);
+                        }
+
+                        if (text.length > 30) {
+                            setTimeout(() => {
+                                showFriendshipMessage("도망칠래요...");
+                            }, 3000);
+                        }
+                    }
+                }
+            }
+        }
+
+        function showFriendshipMessage(message) {
+            const specialMessage = document.createElement('div');
+            specialMessage.classList.add('special-message');
+            specialMessage.innerHTML = message;
+            chatWindow.appendChild(specialMessage);
+            specialMessage.style.display = 'block';
+        }
+
+        sendButton.addEventListener('click', () => {
+            const messageText = chatInput.value;
+            if (messageText.trim()) {
+                addMessage(messageText, true);
+                chatData[chatContainer.dataset.roomId].kCount += countKs(messageText);
+                updateFriendshipLevel(chatContainer.dataset.roomId);
+                chatInput.value = '';
+            }
+        });
+
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const messageText = chatInput.value;
+                if (messageText.trim()) {
+                    addMessage(messageText, true);
+                    chatData[chatContainer.dataset.roomId].kCount += countKs(messageText);
+                    updateFriendshipLevel(chatContainer.dataset.roomId);
+                    chatInput.value = '';
+                }
+            }
         });
     </script>
 </body>
